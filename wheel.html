@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        .svg {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 600px;
+            height: 600px;
+            transition: transform 3s ease-out;
+            transform-origin: 50% 50%;
+        }
+        .frame{
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            width: fit-content;
+        }
+        .pointer{
+            width: 100px;
+            height: 60px;
+            visibility: hidden;
+        }
+        .spin{
+            visibility: hidden;
+        }
+    </style>
+</head>
+<body>
+<div class="frame">
+<div class="input-container">
+<input class="input" type="number">
+<button class="button">send</button>
+</div>
+<svg class="svg" viewBox="0 0 600 600"></svg>
+<img class='pointer' src="Polygon.svg" alt="Polygon">
+    <button class="spin">spin</button>
+</div>
+</body>
+<script>
+    const input = document.querySelector('.input');
+    const button = document.querySelector('.button');
+    const svg = document.querySelector('.svg');
+    const pointer = document.querySelector('.pointer');
+    const spin = document.querySelector('.spin');
+    const input_container = document.querySelector('.input-container');
+
+    const cx = 300;
+    const cy = 300;
+    const r = 300;
+    const value = Number(input.value);
+    const angle = 360 / value;
+    const rad = angle * Math.PI / 180;
+
+    function drawcircle(cx, cy, r) {
+        const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+        circle.setAttribute("cx", cx);
+        circle.setAttribute("cy",cy );
+        circle.setAttribute("r", r);
+        circle.setAttribute("fill", "red");
+        svg.appendChild(circle);
+    }
+
+    function drawline(inputs){
+        for(let i = 0; i < value; i++) {
+            const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+            path.setAttribute('stroke', 'black');
+            path.setAttribute('stroke-width', '2');
+            path.setAttribute('fill', 'none');
+            path.setAttribute('d', `M${cx} ${cy} L${cx} ${cy} L${cx + r * Math.cos(rad*i)} ${cy + r * Math.sin(rad*i)}`);
+            svg.appendChild(path);
+
+            const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+            text.setAttribute('transform', `translate(${cx}, ${cy}) rotate(${angle * i - (90 - angle / 2)})`);
+            text.setAttribute('y', `${r * 0.5}`);
+            text.setAttribute('font-size', '14');
+            text.setAttribute('text-anchor', 'middle');
+            text.textContent = `${inputs[i]}`;
+            svg.appendChild(text);
+        }
+    }
+
+    function getRandomInt() {
+        return Math.floor(Math.random() * (360 + 1));
+    }
+
+    function spinCircle(random){
+        console.log(random);
+        let currentRotation = 360+(360-random)+90; ///чекнуть подробнее
+        svg.style.transform = `rotate(${currentRotation}deg)`;
+        spin.style.visibility = 'hidden';
+    }
+
+    function getSector() {
+        let random = getRandomInt();
+        spinCircle(random);
+        return Math.ceil(random/angle);
+    }
+
+    function textareaRender(){
+        let inputs = [];
+        const ol = document.createElement('ol');
+        input_container.appendChild(ol);
+        for(let i = 0; i < Number(input.value); i++) {
+            const inputtext = document.createElement('input');
+            const li = document.createElement('li');
+            li.classList.add('list-item');
+            li.appendChild(inputtext);
+            inputtext.classList.add('input-text');
+            ol.append(li);
+
+            inputs.push(inputtext);
+
+            inputtext.addEventListener('input', check);
+        }
+
+        let isReady = false;
+
+        function check() {
+
+            const values = inputs.map(el => el.value.trim());
+
+            const allFilled = values.every(val => val !== '');
+
+            if (allFilled) {
+                isReady = true;
+
+                drawcircle(cx, cy, r);
+                drawline(values);
+
+                spin.style.visibility = 'visible';
+                pointer.style.visibility = 'visible';
+            }
+        }
+    }
+
+    button.onclick = function(){
+        if (!value) return;
+
+        textareaRender();
+        button.disabled = true;
+    };
+
+    spin.onclick = function(){
+        getSector();
+    }
+</script>
+</html>
