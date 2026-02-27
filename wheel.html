@@ -36,8 +36,10 @@
         <button class="button">send</button>
     </div>
     <svg class="svg" viewBox="0 0 600 600"></svg>
+    <div class="pointer-container">
     <img class='pointer' src="Polygon.svg" alt="Polygon">
     <button class="spin">spin</button>
+    </div>
 </div>
 </body>
 <script>
@@ -47,23 +49,16 @@
     const pointer = document.querySelector('.pointer');
     const spin = document.querySelector('.spin');
     const input_container = document.querySelector('.input-container');
+    const pointer_container = document.querySelector('.pointer-container');
 
     const cx = 300;
     const cy = 300;
     const r = 300;
-
-
-    function drawcircle() {
-        const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-        circle.setAttribute("cx", cx);
-        circle.setAttribute("cy",cy );
-        circle.setAttribute("r", r);
-        circle.setAttribute("fill", "red");
-        svg.appendChild(circle);
-    }
+    let values = [];
 
     function drawline(inputs, value, rad, angle){
-        const colors = ['pink', 'lightgreen', 'lightblue', 'red', 'orange', 'yellow', 'lime','purple','deeppink', 'deepskyblue','blueviolet','teal', 'brown'];
+        svg.innerHTML = '';
+        const colors = ['pink', 'lightgreen', 'lightblue', 'red', 'orange', 'yellow', 'lime','purple','deeppink', 'deepskyblue','blueviolet','teal', 'brown', 'green'];
 
         function shuffle(array) {
             let arr = [...array];
@@ -89,7 +84,8 @@
             const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
             text.setAttribute('transform', `translate(${cx}, ${cy}) rotate(${angle * i - (90 - angle / 2)})`);
             text.setAttribute('y', `${r * 0.5}`);
-            text.setAttribute('font-size', '14');
+            text.setAttribute('font-size', '16');
+            text.setAttribute('fill', 'white');
             text.setAttribute('text-anchor', 'middle');
             text.textContent = `${inputs[i]}`;
             svg.appendChild(text);
@@ -97,17 +93,16 @@
     }
 
     function getRandomInt() {
-        return Math.floor(Math.random() * (360 + 1));
+        return Math.floor((Math.random() * 360)+ 1);
     }
 
     function spinCircle(random){
-        console.log(random);
-        let currentRotation = 360+(360-random)+90; ///чекнуть подробнее
+        let currentRotation = 360+(360-random)+90;
         svg.style.transform = `rotate(${currentRotation}deg)`;
         spin.style.visibility = 'hidden';
     }
 
-    function getSector() {
+    function getSector(angle) {
         let random = getRandomInt();
         spinCircle(random);
         return Math.ceil(random/angle);
@@ -133,15 +128,12 @@
         let isReady = false;
 
         function check() {
-
-            const values = inputs.map(el => el.value.trim());
-
+            values = inputs.map(el => el.value.trim());
             const allFilled = values.every(val => val !== '');
 
             if (allFilled) {
                 isReady = true;
 
-                drawcircle();
                 drawline(values, value, rad, angle);
 
                 spin.style.visibility = 'visible';
@@ -150,9 +142,20 @@
         }
     }
 
+    function showWinner(sector) {
+        let winner_text = document.createElement('p');
+        winner_text.textContent = `${values[sector-1]}`;
+        pointer_container.appendChild(winner_text);
+    }
+
     button.onclick = function(){
         const value = Number(input.value);
         if (!value) return;
+        if (value>20){
+            input.value = '';
+            alert('Максимальное число секторов 20! Введите меньшее число')
+            return;
+        }
 
         const angle = 360 / value;
         const rad = angle * Math.PI / 180;
@@ -162,7 +165,13 @@
     };
 
     spin.onclick = function(){
-        getSector();
+        const value = Number(input.value);
+        const angle = 360 / value;
+        const sector = getSector(angle);
+        svg.addEventListener('transitionend', function handler() {
+            showWinner(sector);
+            svg.removeEventListener('transitionend', handler);
+        });
     }
 </script>
 </html>
