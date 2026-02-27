@@ -31,12 +31,12 @@
 </head>
 <body>
 <div class="frame">
-<div class="input-container">
-<input class="input" type="number">
-<button class="button">send</button>
-</div>
-<svg class="svg" viewBox="0 0 600 600"></svg>
-<img class='pointer' src="Polygon.svg" alt="Polygon">
+    <div class="input-container">
+        <input class="input" type="number">
+        <button class="button">send</button>
+    </div>
+    <svg class="svg" viewBox="0 0 600 600"></svg>
+    <img class='pointer' src="Polygon.svg" alt="Polygon">
     <button class="spin">spin</button>
 </div>
 </body>
@@ -51,9 +51,7 @@
     const cx = 300;
     const cy = 300;
     const r = 300;
-    const value = Number(input.value);
-    const angle = 360 / value;
-    const rad = angle * Math.PI / 180;
+
 
     function drawcircle(cx, cy, r) {
         const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
@@ -64,7 +62,7 @@
         svg.appendChild(circle);
     }
 
-    function drawline(inputs){
+    function drawline(inputs, value, cx, cy, r, rad, angle){
         for(let i = 0; i < value; i++) {
             const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
             path.setAttribute('stroke', 'black');
@@ -100,11 +98,11 @@
         return Math.ceil(random/angle);
     }
 
-    function textareaRender(){
+    function textareaRender(value, angle, rad){
         let inputs = [];
         const ol = document.createElement('ol');
         input_container.appendChild(ol);
-        for(let i = 0; i < Number(input.value); i++) {
+        for(let i = 0; i < value; i++) {
             const inputtext = document.createElement('input');
             const li = document.createElement('li');
             li.classList.add('list-item');
@@ -129,7 +127,7 @@
                 isReady = true;
 
                 drawcircle(cx, cy, r);
-                drawline(values);
+                drawline(values, value, cx, cy, r, rad, angle);
 
                 spin.style.visibility = 'visible';
                 pointer.style.visibility = 'visible';
@@ -138,9 +136,13 @@
     }
 
     button.onclick = function(){
+        const value = Number(input.value);
         if (!value) return;
 
-        textareaRender();
+        const angle = 360 / value;
+        const rad = angle * Math.PI / 180;
+
+        textareaRender(value, angle, rad);
         button.disabled = true;
     };
 
